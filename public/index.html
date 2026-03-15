@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Explorers Handbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Special+Elite&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --paper:#F5EDDA;--paper2:#EDE1C2;--paper3:#E2D4AC;
+  --ink:#2A1F0E;--ink2:#5C4A2A;--ink3:#8A7150;
+  --red:#8B2215;--red2:#C0392B;
+  --green:#2D5016;--green2:#4A7C2A;
+  --gold:#C0A060;--gold2:#8B6914;
+  --blue:#1A4A6B;
+  --border:rgba(42,31,14,0.2);--border2:rgba(42,31,14,0.1);
+}
+body{font-family:'Lora',serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* ── LOGIN SCREEN ── */
+#login-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+.login-box{
+  width:100%;max-width:420px;
+  background:var(--paper);
+  border:2px solid var(--gold);
+  padding:40px;
+  position:relative;
+}
+.login-box::before{
+  content:'';position:absolute;inset:6px;
+  border:1px solid rgba(192,160,96,0.3);
+  pointer-events:none;
+}
+.login-crest{
+  text-align:center;margin-bottom:28px;
+}
+.login-crest .emblem{font-size:48px;line-height:1;}
+.login-crest h1{
+  font-family:'Playfair Display',serif;font-size:26px;
+  color:var(--ink);margin-top:10px;
+}
+.login-crest p{
+  font-family:'Special Elite',cursive;font-size:11px;
+  color:var(--ink3);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;
+}
+.login-tabs{display:flex;margin-bottom:24px;border-bottom:1px solid var(--border);}
+.login-tab{
+  flex:1;padding:10px;text-align:center;
+  font-family:'Special Elite',cursive;font-size:12px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all 0.15s;
+}
+.login-tab.active{color:var(--red);border-bottom-color:var(--red);}
+.login-panel{display:none;}
+.login-panel.active{display:block;}
+.login-field{margin-bottom:14px;}
+.login-field label{
+  display:block;font-family:'Special Elite',cursive;
+  font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:5px;
+}
+.login-field input{
+  width:100%;background:var(--paper2);border:1px solid var(--border);
+  padding:10px 14px;font-family:'Lora',serif;font-size:14px;color:var(--ink);
+  outline:none;transition:border-color 0.15s;
+}
+.login-field input:focus{border-color:var(--gold);}
+.login-btn{
+  width:100%;background:var(--ink);color:var(--paper);border:none;
+  padding:12px;font-family:'Special Elite',cursive;font-size:13px;
+  letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;
+  transition:background 0.15s;margin-top:4px;
+}
+.login-btn:hover{background:var(--ink2);}
+.login-error{
+  font-family:'Special Elite',cursive;font-size:12px;color:var(--red);
+  text-align:center;margin-top:10px;display:none;
+}
+
+/* ── APP ── */
+#app{display:none;}
+
+/* ── HEADER ── */
+header{
+  background:var(--ink);position:sticky;top:0;z-index:100;
+  box-shadow:0 3px 12px rgba(0,0,0,0.4);
+}
+.header-inner{display:flex;align-items:stretch;}
+.header-brand{
+  padding:12px 24px;border-right:1px solid rgba(255,255,255,0.08);
+  display:flex;flex-direction:column;justify-content:center;min-width:200px;
+}
+.header-brand h1{
+  font-family:'Playfair Display',serif;font-size:18px;
+  color:var(--paper);letter-spacing:0.03em;
+}
+.header-brand .sub{
+  font-family:'Special Elite',cursive;font-size:10px;
+  color:var(--ink3);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;
+}
+.header-brand .sub span{color:var(--gold);}
+nav{display:flex;flex:1;overflow-x:auto;}
+nav a{
+  display:flex;align-items:center;gap:6px;padding:0 18px;
+  font-family:'Special Elite',cursive;font-size:11px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink3);text-decoration:none;
+  border-right:1px solid rgba(255,255,255,0.05);transition:all 0.15s;
+  white-space:nowrap;cursor:pointer;
+}
+nav a:hover{color:var(--paper);background:rgba(255,255,255,0.04);}
+nav a.active{color:var(--gold);border-bottom:2px solid var(--gold);}
+.header-user{
+  display:flex;align-items:center;gap:10px;
+  padding:0 18px;border-left:1px solid rgba(255,255,255,0.08);
+  margin-left:auto;
+}
+.user-badge{
+  font-family:'Special Elite',cursive;font-size:11px;
+  color:var(--gold);letter-spacing:0.05em;
+}
+.logout-btn{
+  background:none;border:1px solid rgba(255,255,255,0.15);
+  color:var(--ink3);font-family:'Special Elite',cursive;font-size:10px;
+  letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;cursor:pointer;
+  transition:all 0.15s;
+}
+.logout-btn:hover{color:var(--paper);border-color:rgba(255,255,255,0.3);}
+
+/* ── PAGES ── */
+.page{display:none;}
+.page.active{display:block;}
+.page-hero{
+  background:var(--ink);padding:24px 36px;
+  border-bottom:3px solid var(--gold);
+}
+.page-hero h2{
+  font-family:'Playfair Display',serif;font-size:28px;
+  color:var(--paper);font-style:italic;
+}
+.page-hero p{
+  font-family:'Special Elite',cursive;font-size:11px;
+  color:var(--ink3);letter-spacing:0.15em;text-transform:uppercase;margin-top:5px;
+}
+.page-content{padding:28px 36px;}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:'Special Elite',cursive;font-size:11px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  padding:8px 18px;border:none;cursor:pointer;transition:all 0.15s;
+}
+.btn-ink{background:var(--ink);color:var(--paper);}
+.btn-ink:hover{background:var(--ink2);}
+.btn-red{background:var(--red);color:white;}
+.btn-red:hover{background:var(--red2);}
+.btn-green{background:var(--green);color:white;}
+.btn-green:hover{background:var(--green2);}
+.btn-outline{background:transparent;color:var(--ink2);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--paper2);}
+.btn-ghost{background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 6px;}
+.btn-ghost:hover{color:var(--red);}
+
+/* ── FORMS ── */
+.fgroup{margin-bottom:12px;}
+.fgroup label{
+  display:block;font-family:'Special Elite',cursive;font-size:10px;
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--ink2);margin-bottom:4px;
+}
+.fgroup input,.fgroup select,.fgroup textarea{
+  width:100%;background:var(--paper2);border:1px solid var(--border);
+  padding:8px 12px;font-family:'Lora',serif;font-size:13px;color:var(--ink);
+  outline:none;transition:border-color 0.15s;
+}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{border-color:var(--gold);}
+.fgroup textarea{min-height:72px;resize:vertical;}
+.hint{font-family:'Special Elite',cursive;font-size:11px;color:var(--ink3);font-style:italic;margin-top:6px;}
+
+/* ── MAP PAGE ── */
+.map-layout{display:grid;grid-template-columns:1fr 300px;height:calc(100vh - 130px);}
+.map-wrap{position:relative;overflow:hidden;background:#C8D8B0;}
+#fantasy-map{width:100%;height:100%;cursor:crosshair;display:block;}
+.map-toolbar{
+  position:absolute;top:12px;left:12px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.tool-btn{
+  background:var(--paper);border:1px solid var(--border);
+  width:36px;height:36px;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;font-family:monospace;
+  box-shadow:1px 1px 4px rgba(0,0,0,0.2);
+}
+.tool-btn:hover,.tool-btn.active{background:var(--ink);color:var(--paper);}
+.map-legend{
+  position:absolute;bottom:12px;left:12px;
+  background:rgba(245,237,218,0.92);border:1px solid var(--border);
+  padding:10px 14px;
+}
+.legend-title{font-family:'Special Elite',cursive;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:'Special Elite',cursive;font-size:11px;color:var(--ink2);margin-bottom:3px;}
+.legend-dot{width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1px solid rgba(0,0,0,0.2);}
+.map-sidebar{
+  background:var(--paper2);border-left:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sidebar-section{padding:16px;border-bottom:1px solid var(--border);}
+.sidebar-title{
+  font-family:'Special Elite',cursive;font-size:10px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:12px;
+}
+.pin-list-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border2);
+  animation:fadeIn 0.3s ease;
+}
+.pin-list-item:last-child{border-bottom:none;}
+.pd{width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1px solid rgba(0,0,0,0.2);flex-shrink:0;}
+.pd.secret{background:var(--red);}
+.pd.viewpoint{background:var(--blue);}
+.pd.camp{background:var(--green);}
+.pd.landmark{background:var(--gold2);}
+.pd.danger{background:#2A1F0E;}
+.pin-name{font-size:12px;font-weight:bold;color:var(--ink);flex:1;}
+.pin-type{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);text-transform:uppercase;}
+.path-list-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border2);
+}
+.path-list-item:last-child{border-bottom:none;}
+.path-swatch{width:28px;height:3px;border-radius:2px;flex-shrink:0;}
+
+/* ── LOG PAGE ── */
+.log-layout{display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:start;}
+.form-box{background:var(--paper2);border:1px solid var(--border);border-top:3px solid var(--red);padding:20px;position:sticky;top:70px;}
+.form-box h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);margin-bottom:14px;}
+.entry-card{
+  background:var(--paper);border:1px solid var(--border);border-left:4px solid var(--red);
+  padding:18px 20px;margin-bottom:14px;animation:fadeIn 0.4s ease;
+}
+.entry-date{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px;}
+.entry-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink);margin-bottom:7px;}
+.entry-body{font-size:13px;color:var(--ink2);line-height:1.75;font-style:italic;margin-bottom:10px;}
+.entry-crew{font-family:'Special Elite',cursive;font-size:11px;color:var(--ink3);}
+.entry-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.etag{font-family:'Special Elite',cursive;font-size:10px;padding:2px 8px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--border);background:var(--paper2);color:var(--ink2);}
+.entry-actions{margin-top:10px;display:flex;gap:6px;}
+
+/* ── RANKS PAGE ── */
+.ranks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:32px;}
+.rank-card{background:var(--paper2);border:1px solid var(--border);padding:20px 14px;text-align:center;position:relative;transition:transform 0.15s;}
+.rank-card:hover{transform:translateY(-2px);}
+.rank-card.unlocked{border:2px solid var(--gold);}
+.you-badge{position:absolute;top:-1px;right:-1px;background:var(--gold);color:var(--ink);font-family:'Special Elite',cursive;font-size:9px;padding:3px 8px;letter-spacing:0.1em;text-transform:uppercase;}
+.rank-emblem{font-size:36px;margin-bottom:8px;line-height:1;}
+.rank-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);margin-bottom:3px;}
+.rank-req{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);letter-spacing:0.05em;}
+.rank-locked{opacity:0.4;}
+.lb-section h3{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);margin-bottom:14px;border-bottom:2px solid var(--border);padding-bottom:8px;}
+.lb{border:1px solid var(--border);overflow:hidden;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border2);background:var(--paper);}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:nth-child(even){background:var(--paper2);}
+.lb-row.you{background:rgba(192,160,96,0.12);border-left:3px solid var(--gold);}
+.lb-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--red);width:28px;text-align:center;flex-shrink:0;}
+.lb-num.g{color:var(--gold);}
+.lb-num.s{color:#8A8A8A;}
+.lb-num.b{color:#8B5A1A;}
+.lb-av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-size:14px;font-weight:bold;color:var(--ink);}
+.lb-title{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em;}
+.lb-score{font-family:'Playfair Display',serif;font-size:18px;color:var(--red);font-weight:700;}
+.lb-lbl{font-family:'Special Elite',cursive;font-size:9px;color:var(--ink3);}
+
+/* ── MISSIONS ── */
+.mission-layout{display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:start;}
+.form-box-green{background:var(--paper2);border:1px solid var(--border);border-top:3px solid var(--green);padding:20px;position:sticky;top:70px;}
+.form-box-green h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);margin-bottom:14px;}
+.mission-card{background:var(--paper);border:1px solid var(--border);border-top:4px solid var(--green);padding:16px 18px;margin-bottom:12px;animation:fadeIn 0.4s ease;}
+.m-status{display:inline-block;font-family:'Special Elite',cursive;font-size:10px;padding:2px 8px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.m-status.planned{background:rgba(192,160,96,0.2);color:var(--gold2);border:1px solid var(--gold);}
+.m-status.completed{background:rgba(45,80,22,0.15);color:var(--green);border:1px solid var(--green);}
+.m-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:8px;}
+.m-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+.m-meta-item{font-family:'Special Elite',cursive;font-size:11px;color:var(--ink3);}
+.m-meta-item span{color:var(--ink);}
+.m-gear{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.gear-tag{background:var(--green);color:white;font-family:'Special Elite',cursive;font-size:10px;padding:2px 8px;letter-spacing:0.06em;text-transform:uppercase;}
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.check-item{display:flex;align-items:center;gap:6px;font-family:'Special Elite',cursive;font-size:11px;color:var(--ink2);padding:4px 0;cursor:pointer;}
+.check-item input{accent-color:var(--green);width:13px;height:13px;}
+.m-actions{margin-top:10px;display:flex;gap:6px;}
+
+/* ── WEATHER ── */
+.wx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+.wx-day{background:var(--paper2);border:1px solid var(--border);padding:16px 12px;text-align:center;}
+.wx-day.today{border:2px solid var(--gold);background:var(--paper);}
+.wd-label{font-family:'Special Elite',cursive;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.wd-icon{font-size:30px;margin-bottom:6px;line-height:1;}
+.wd-temp{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);margin-bottom:3px;}
+.wd-rain{font-family:'Special Elite',cursive;font-size:10px;color:var(--blue);}
+.wd-rain.hi{color:var(--red);}
+.wx-advice{background:var(--ink);color:var(--paper);padding:20px 24px;border-left:4px solid var(--gold);}
+.wx-advice h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:10px;}
+.wx-advice p{font-size:13px;line-height:1.75;color:rgba(245,237,218,0.8);}
+.wx-tips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.wx-tip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);padding:12px;}
+.wx-tip h4{font-family:'Special Elite',cursive;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.wx-tip p{font-size:12px;color:rgba(245,237,218,0.65);line-height:1.6;}
+
+/* ── ADMIN PAGE ── */
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.admin-card{background:var(--paper2);border:1px solid var(--border);border-top:3px solid var(--gold);padding:20px;}
+.admin-card h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:14px;}
+.member-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2);}
+.member-row:last-child{border-bottom:none;}
+.member-av{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Playfair Display',serif;flex-shrink:0;}
+.member-name{font-size:13px;font-weight:bold;color:var(--ink);flex:1;}
+.member-since{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);}
+.member-disc{font-family:'Playfair Display',serif;font-size:14px;color:var(--red);}
+.admin-stat{background:var(--paper);border:1px solid var(--border);padding:14px;text-align:center;margin-bottom:10px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:28px;color:var(--red);font-weight:700;}
+.stat-lbl{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.danger-zone{background:rgba(139,34,21,0.06);border:1px solid rgba(139,34,21,0.2);padding:14px;margin-top:14px;}
+.danger-zone h4{font-family:'Special Elite',cursive;font-size:11px;color:var(--red);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9998;
+  background:var(--ink);color:var(--paper);
+  font-family:'Special Elite',cursive;font-size:12px;letter-spacing:0.08em;
+  padding:12px 20px;border-left:3px solid var(--gold);
+  transform:translateY(80px);opacity:0;transition:all 0.3s ease;
+  pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── PIN TOOLTIP ── */
+.pin-tooltip{
+  position:absolute;background:var(--paper);border:2px solid var(--ink);
+  padding:10px 14px;pointer-events:none;z-index:50;
+  box-shadow:3px 3px 0 var(--ink2);min-width:140px;
+}
+.pt-name{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);}
+.pt-type{font-family:'Special Elite',cursive;font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.pt-notes{font-size:12px;color:var(--ink2);font-style:italic;}
+
+/* ── MISC ── */
+.divider{border:none;border-top:1px solid var(--border2);margin:20px 0;position:relative;}
+.divider::after{content:'✦';position:absolute;left:50%;top:-8px;transform:translateX(-50%);background:var(--paper);padding:0 8px;color:var(--ink3);font-size:10px;}
+.empty-state{font-family:'Special Elite',cursive;font-size:12px;color:var(--ink3);font-style:italic;padding:12px 0;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:700px){
+  .map-layout,.log-layout,.mission-layout,.admin-grid{grid-template-columns:1fr;}
+  .wx-tips{grid-template-columns:1fr;}
+  .page-content{padding:18px;}
+  .header-brand{min-width:unset;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-crest">
+      <div class="emblem">⚑</div>
+      <h1>The Explorers Handbook</h1>
+      <p>Presint 14 · Putrajaya</p>
+    </div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchTab('crew')">Crew Login</div>
+      <div class="login-tab" onclick="switchTab('admin')">Admin</div>
+    </div>
+    <!-- Crew -->
+    <div id="tab-crew" class="login-panel active">
+      <div class="login-field">
+        <label>Your Name</label>
+        <input type="text" id="crew-name" placeholder="e.g. Amir"/>
+      </div>
+      <div class="login-field">
+        <label>Crew Passphrase</label>
+        <input type="password" id="crew-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')crewLogin()"/>
+      </div>
+      <button class="login-btn" onclick="crewLogin()">Enter the Handbook</button>
+      <div class="login-error" id="crew-err">Wrong passphrase. Try again.</div>
+    </div>
+    <!-- Admin -->
+    <div id="tab-admin" class="login-panel">
+      <div class="login-field">
+        <label>Admin Password</label>
+        <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
+      </div>
+      <button class="login-btn" onclick="adminLogin()">Enter as Admin</button>
+      <div class="login-error" id="admin-err">Wrong password.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div class="header-brand">
+        <h1>⚑ The Explorers</h1>
+        <div class="sub">Presint 14 · <span>Putrajaya</span></div>
+      </div>
+      <nav>
+        <a onclick="showPage('map')" data-p="map" class="active">🗺 Map</a>
+        <a onclick="showPage('log')" data-p="log">📖 Log</a>
+        <a onclick="showPage('ranks')" data-p="ranks">🏅 Ranks</a>
+        <a onclick="showPage('missions')" data-p="missions">🧭 Missions</a>
+        <a onclick="showPage('weather')" data-p="weather">🌦 Weather</a>
+        <a onclick="showPage('admin')" data-p="admin" id="admin-nav" style="display:none">⚙ Admin</a>
+      </nav>
+      <div class="header-user">
+        <span class="user-badge" id="user-display">Explorer</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ MAP PAGE ══ -->
+  <div id="page-map" class="page active">
+    <div class="map-layout">
+      <div class="map-wrap">
+        <canvas id="fantasy-map"></canvas>
+        <div class="map-toolbar">
+          <button class="tool-btn active" id="tool-pin" onclick="setTool('pin')" title="Drop Pin">📍</button>
+          <button class="tool-btn" id="tool-path" onclick="setTool('path')" title="Draw Path">✏️</button>
+          <button class="tool-btn" id="tool-move" onclick="setTool('move')" title="Pan">✋</button>
+          <button class="tool-btn" id="tool-erase" onclick="setTool('erase')" title="Erase">🗑</button>
+        </div>
+        <div class="map-legend">
+          <div class="legend-title">Legend</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Secret Spot</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Viewpoint</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Camp</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold2)"></div>Landmark</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#2A1F0E"></div>Danger</div>
+        </div>
+        <div class="pin-tooltip" id="pin-tooltip" style="display:none">
+          <div class="pt-type" id="tt-type"></div>
+          <div class="pt-name" id="tt-name"></div>
+          <div class="pt-notes" id="tt-notes"></div>
+        </div>
+      </div>
+
+      <div class="map-sidebar">
+        <!-- Pin form -->
+        <div class="sidebar-section">
+          <div class="sidebar-title">📍 Add Pin</div>
+          <div class="fgroup">
+            <label>Name</label>
+            <input type="text" id="pin-name" placeholder="e.g. The Hollow Tree"/>
+          </div>
+          <div class="fgroup">
+            <label>Type</label>
+            <select id="pin-type">
+              <option value="secret">🔴 Secret Spot</option>
+              <option value="viewpoint">🔵 Viewpoint</option>
+              <option value="camp">🟢 Camp / Rest</option>
+              <option value="landmark">🟡 Landmark</option>
+              <option value="danger">⚫ Danger Zone</option>
+            </select>
+          </div>
+          <div class="fgroup">
+            <label>Notes</label>
+            <input type="text" id="pin-notes" placeholder="What's here?"/>
+          </div>
+          <p class="hint" id="map-hint">Select the pin tool then click on the map.</p>
+          <div style="margin-top:8px;">
+            <button class="btn btn-ink" onclick="confirmPin()">Mark Spot</button>
+          </div>
+        </div>
+
+        <!-- Path form -->
+        <div class="sidebar-section">
+          <div class="sidebar-title">✏️ Draw Path</div>
+          <div class="fgroup">
+            <label>Path Name</label>
+            <input type="text" id="path-name" placeholder="e.g. The Long Way Round"/>
+          </div>
+          <div class="fgroup">
+            <label>Colour</label>
+            <select id="path-color">
+              <option value="#8B2215">Red — Main route</option>
+              <option value="#2D5016">Green — Nature trail</option>
+              <option value="#1A4A6B">Blue — Water route</option>
+              <option value="#8B6914">Brown — Old path</option>
+              <option value="#2A1F0E">Black — Danger route</option>
+            </select>
+          </div>
+          <p class="hint" id="path-hint">Select the draw tool then click & drag on the map.</p>
+          <div style="margin-top:8px;display:flex;gap:6px;">
+            <button class="btn btn-ink" onclick="savePath()">Save Path</button>
+            <button class="btn btn-outline" onclick="clearDraft()">Clear</button>
+          </div>
+        </div>
+
+        <!-- Pins list -->
+        <div class="sidebar-section" style="flex:1">
+          <div class="sidebar-title">Discovered Spots (<span id="pin-count">0</span>)</div>
+          <div id="pin-list"><p class="empty-state">No pins yet.</p></div>
+        </div>
+
+        <!-- Paths list -->
+        <div class="sidebar-section">
+          <div class="sidebar-title">Paths (<span id="path-count">0</span>)</div>
+          <div id="path-list"><p class="empty-state">No paths yet.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOG PAGE ══ -->
+  <div id="page-log" class="page">
+    <div class="page-hero">
+      <h2>Expedition Log</h2>
+      <p>Chronicles of The Explorers · Every adventure recorded</p>
+    </div>
+    <div class="page-content">
+      <div class="log-layout">
+        <div class="form-box">
+          <h3>📝 New Entry</h3>
+          <div class="fgroup"><label>Title</label><input type="text" id="log-title" placeholder="The Great Swamp Crossing"/></div>
+          <div class="fgroup"><label>Date</label><input type="date" id="log-date"/></div>
+          <div class="fgroup"><label>Crew</label><input type="text" id="log-crew" placeholder="Abhinav, Amir, Sara"/></div>
+          <div class="fgroup"><label>What Happened</label><textarea id="log-body" placeholder="Tell the story..."></textarea></div>
+          <div class="fgroup"><label>Tags (comma separated)</label><input type="text" id="log-tags" placeholder="rain, long, discovery"/></div>
+          <button class="btn btn-ink" onclick="addLog()" style="width:100%;margin-top:4px;">Record Expedition</button>
+        </div>
+        <div id="log-entries"><p class="empty-state">No entries yet. Record your first expedition!</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RANKS PAGE ══ -->
+  <div id="page-ranks" class="page">
+    <div class="page-hero">
+      <h2>Explorer Ranks</h2>
+      <p>Earn your title through discovery · Rise through the ranks</p>
+    </div>
+    <div class="page-content">
+      <div class="ranks-grid">
+        <div class="rank-card" id="rank-scout">
+          <div class="rank-emblem">🥾</div>
+          <div class="rank-name">Scout</div>
+          <div class="rank-req">Starting rank</div>
+        </div>
+        <div class="rank-card rank-locked" id="rank-tracker">
+          <div class="rank-emblem">🌿</div>
+          <div class="rank-name">Tracker</div>
+          <div class="rank-req">5 discoveries</div>
+        </div>
+        <div class="rank-card rank-locked" id="rank-pathfinder">
+          <div class="rank-emblem">🧭</div>
+          <div class="rank-name">Pathfinder</div>
+          <div class="rank-req">15 discoveries</div>
+        </div>
+        <div class="rank-card rank-locked" id="rank-ranger">
+          <div class="rank-emblem">🗺</div>
+          <div class="rank-name">Ranger</div>
+          <div class="rank-req">30 discoveries</div>
+        </div>
+        <div class="rank-card rank-locked" id="rank-cartographer">
+          <div class="rank-emblem">⚑</div>
+          <div class="rank-name">Cartographer</div>
+          <div class="rank-req">50 discoveries</div>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="lb-section">
+        <h3>Leaderboard</h3>
+        <div class="lb" id="leaderboard"><p class="empty-state" style="padding:14px;">No crew members yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MISSIONS PAGE ══ -->
+  <div id="page-missions" class="page">
+    <div class="page-hero">
+      <h2>Mission Planner</h2>
+      <p>Plan your next expedition · Gear up · Head out</p>
+    </div>
+    <div class="page-content">
+      <div class="mission-layout">
+        <div class="form-box-green">
+          <h3>🧭 Plan a Mission</h3>
+          <div class="fgroup"><label>Mission Name</label><input type="text" id="m-title" placeholder="Swamp Route Recon"/></div>
+          <div class="fgroup"><label>Date</label><input type="date" id="m-date"/></div>
+          <div class="fgroup"><label>Crew Going</label><input type="text" id="m-crew" placeholder="Abhinav, Amir"/></div>
+          <div class="fgroup"><label>Destination</label><input type="text" id="m-dest" placeholder="Behind Presint 11 park"/></div>
+          <div class="fgroup">
+            <label>Gear Checklist</label>
+            <div class="checklist-grid">
+              <label class="check-item"><input type="checkbox" value="Water"> Water</label>
+              <label class="check-item"><input type="checkbox" value="Snacks"> Snacks</label>
+              <label class="check-item"><input type="checkbox" value="Flashlight"> Flashlight</label>
+              <label class="check-item"><input type="checkbox" value="Phone"> Phone</label>
+              <label class="check-item"><input type="checkbox" value="First Aid"> First Aid</label>
+              <label class="check-item"><input type="checkbox" value="Rope"> Rope</label>
+              <label class="check-item"><input type="checkbox" value="Notebook"> Notebook</label>
+              <label class="check-item"><input type="checkbox" value="Umbrella"> Umbrella</label>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="addMission()" style="width:100%;margin-top:12px;">Create Mission</button>
+        </div>
+        <div id="mission-list"><p class="empty-state">No missions yet. Plan your first expedition!</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WEATHER PAGE ══ -->
+  <div id="page-weather" class="page">
+    <div class="page-hero">
+      <h2>Weather Intel</h2>
+      <p>Putrajaya, Presint 14 · Know before you go</p>
+    </div>
+    <div class="page-content">
+      <div class="wx-grid">
+        <div class="wx-day today">
+          <div class="wd-label">Today · Sun</div>
+          <div class="wd-icon">☁️</div>
+          <div class="wd-temp">26°C</div>
+          <div class="wd-rain hi">☔ 60% rain</div>
+        </div>
+        <div class="wx-day">
+          <div class="wd-label">Monday</div>
+          <div class="wd-icon">🌦️</div>
+          <div class="wd-temp">32°C</div>
+          <div class="wd-rain">☔ 45% rain</div>
+        </div>
+        <div class="wx-day">
+          <div class="wd-label">Tuesday</div>
+          <div class="wd-icon">🌧️</div>
+          <div class="wd-temp">32°C</div>
+          <div class="wd-rain hi">☔ 85% — Avoid</div>
+        </div>
+        <div class="wx-day">
+          <div class="wd-label">Wednesday</div>
+          <div class="wd-icon">🌦️</div>
+          <div class="wd-temp">32°C</div>
+          <div class="wd-rain">☔ 45% rain</div>
+        </div>
+        <div class="wx-day">
+          <div class="wd-label">Thursday</div>
+          <div class="wd-icon">⛅</div>
+          <div class="wd-temp">31°C</div>
+          <div class="wd-rain hi">☔ 60% rain</div>
+        </div>
+      </div>
+      <div class="wx-advice">
+        <h3>⚑ Field Intelligence</h3>
+        <p>Typical Putrajaya week — hot and humid with afternoon showers. Tuesday is the worst day at 85% rain. Best window is <strong style="color:var(--gold)">early morning before 11am</strong> when it's cooler and the rain hasn't built up.</p>
+        <div class="wx-tips">
+          <div class="wx-tip"><h4>🌡 Heat</h4><p>Highs of 31–32°C. Bring at least 1.5L water per explorer. Take shade breaks.</p></div>
+          <div class="wx-tip"><h4>☔ Rain</h4><p>Pack a poncho every time. Malaysian rain arrives fast — paths get slippery quick.</p></div>
+          <div class="wx-tip"><h4>⏰ Best Time</h4><p>7am–10am is the golden window. Avoid 2pm–5pm — peak storm time in Putrajaya.</p></div>
+          <div class="wx-tip"><h4>👟 Terrain</h4><p>After rain the grass near Putrajaya wetlands gets very slick. Wear grip shoes, not sandals.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN PAGE ══ -->
+  <div id="page-admin" class="page">
+    <div class="page-hero">
+      <h2>Admin Panel</h2>
+      <p>Abhinav · Handbook Commander</p>
+    </div>
+    <div class="page-content">
+      <div class="stats-row">
+        <div class="admin-stat"><div class="stat-num" id="stat-pins">0</div><div class="stat-lbl">Pins</div></div>
+        <div class="admin-stat"><div class="stat-num" id="stat-logs">0</div><div class="stat-lbl">Log Entries</div></div>
+        <div class="admin-stat"><div class="stat-num" id="stat-members">0</div><div class="stat-lbl">Crew Members</div></div>
+      </div>
+      <div class="admin-grid">
+        <div class="admin-card">
+          <h3>👥 Crew Members</h3>
+          <div id="members-list"><p class="empty-state">No members yet.</p></div>
+        </div>
+        <div class="admin-card">
+          <h3>⚙ Settings</h3>
+          <p style="font-family:'Special Elite',cursive;font-size:12px;color:var(--ink3);margin-bottom:14px;">Change these in <code>server.js</code> or set as environment variables on Render.</p>
+          <div style="background:var(--paper);border:1px solid var(--border);padding:12px;font-family:monospace;font-size:12px;color:var(--ink2);line-height:2;">
+            CREW_PASSPHRASE = explorers14<br/>
+            ADMIN_PASSWORD = abhinav123<br/>
+            PORT = 3000
+          </div>
+          <div class="danger-zone">
+            <h4>⚠ Danger Zone</h4>
+            <button class="btn btn-red" onclick="clearAllData()" style="width:100%;">Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let SESSION = null; // { name, role }
+let pins = [], paths = [], logs = [], missions = [], members = [];
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='crew')||(i===1&&tab==='admin')));
+  document.getElementById('tab-crew').classList.toggle('active', tab==='crew');
+  document.getElementById('tab-admin').classList.toggle('active', tab==='admin');
+}
+
+async function crewLogin() {
+  const name = document.getElementById('crew-name').value.trim();
+  const pass = document.getElementById('crew-pass').value;
+  const err = document.getElementById('crew-err');
+  err.style.display='none';
+  try {
+    const r = await api('POST','/api/auth/crew',{passphrase:pass,name});
+    SESSION = r;
+    enterApp();
+  } catch(e) {
+    err.style.display='block';
+    err.textContent = e.message || 'Wrong passphrase.';
+  }
+}
+
+async function adminLogin() {
+  const pass = document.getElementById('admin-pass').value;
+  const err = document.getElementById('admin-err');
+  err.style.display='none';
+  try {
+    const r = await api('POST','/api/auth/admin',{password:pass});
+    SESSION = r;
+    enterApp();
+  } catch(e) {
+    err.style.display='block';
+  }
+}
+
+function enterApp() {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-display').textContent = SESSION.name + (SESSION.role==='admin' ? ' ⚑' : '');
+  if (SESSION.role==='admin') document.getElementById('admin-nav').style.display='flex';
+  loadAll();
+  initMap();
+}
+
+function logout() {
+  SESSION = null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('crew-pass').value='';
+  document.getElementById('admin-pass').value='';
+  document.getElementById('crew-name').value='';
+}
+
+// ══════════════════════════════════════════
+// API
+// ══════════════════════════════════════════
+async function api(method, url, body) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Error');
+  return data;
+}
+
+async function loadAll() {
+  [pins, paths, logs, missions, members] = await Promise.all([
+    api('GET','/api/pins'),
+    api('GET','/api/paths'),
+    api('GET','/api/logs'),
+    api('GET','/api/missions'),
+    api('GET','/api/members')
+  ]);
+  renderPinList();
+  renderPathList();
+  renderLogs();
+  renderMissions();
+  renderLeaderboard();
+  renderAdminMembers();
+  updateStats();
+  if (mapReady) drawMap();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('active', a.dataset.p===name));
+  document.getElementById('page-'+name).classList.add('active');
+  if (name==='map') setTimeout(()=>{resizeMap();drawMap();},50);
+}
+
+// ══════════════════════════════════════════
+// FANTASY MAP
+// ══════════════════════════════════════════
+const MAP_W = 1200, MAP_H = 900;
+// Home: Presint 14 centre of canvas
+const HOME = { x: 600, y: 450 };
+
+let canvas, ctx, mapReady = false;
+let currentTool = 'pin';
+let pendingPin = null;
+let draftPath = [];
+let isDrawing = false;
+let mapScale = 1, mapOffX = 0, mapOffY = 0;
+let isDragging = false, dragStart = null;
+
+const PIN_COLORS = {
+  secret:'#8B2215', viewpoint:'#1A4A6B',
+  camp:'#2D5016', landmark:'#8B6914', danger:'#2A1F0E'
+};
+const PIN_LABELS = {
+  secret:'Secret Spot', viewpoint:'Viewpoint',
+  camp:'Camp / Rest', landmark:'Landmark', danger:'Danger Zone'
+};
+
+function initMap() {
+  canvas = document.getElementById('fantasy-map');
+  ctx = canvas.getContext('2d');
+  resizeMap();
+  window.addEventListener('resize', resizeMap);
+
+  canvas.addEventListener('mousedown', onMapDown);
+  canvas.addEventListener('mousemove', onMapMove);
+  canvas.addEventListener('mouseup', onMapUp);
+  canvas.addEventListener('mouseleave', () => { isDrawing=false; isDragging=false; document.getElementById('pin-tooltip').style.display='none'; });
+  canvas.addEventListener('wheel', onMapWheel, {passive:false});
+
+  mapReady = true;
+  drawMap();
+}
+
+function resizeMap() {
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  drawMap();
+}
+
+function toCanvas(mx, my) {
+  return { x:(mx - mapOffX)/mapScale, y:(my - mapOffY)/mapScale };
+}
+function toScreen(wx, wy) {
+  return { x:wx*mapScale+mapOffX, y:wy*mapScale+mapOffY };
+}
+
+function onMapDown(e) {
+  const {x:mx,y:my} = getMousePos(e);
+  const {x,y} = toCanvas(mx,my);
+
+  if (currentTool==='move') {
+    isDragging=true; dragStart={x:mx,y:my,ox:mapOffX,oy:mapOffY}; return;
+  }
+  if (currentTool==='pin') {
+    pendingPin={x,y};
+    document.getElementById('map-hint').textContent='Location chosen! Fill in the form and click Mark Spot.';
+    drawMap();
+    return;
+  }
+  if (currentTool==='path') {
+    isDrawing=true; draftPath=[{x,y}]; return;
+  }
+  if (currentTool==='erase') {
+    // find closest pin within 20px and remove
+    const hit = pins.find(p => {
+      const s = toScreen(p.x,p.y);
+      return Math.hypot(s.x-mx,s.y-my)<20;
+    });
+    if (hit && SESSION) {
+      if (SESSION.role==='admin' || hit.addedBy===SESSION.name) {
+        api('DELETE','/api/pins/'+hit.id).then(()=>{ pins=pins.filter(p=>p.id!==hit.id); renderPinList(); updateStats(); drawMap(); toast('Pin removed'); });
+      } else { toast('You can only remove your own pins'); }
+    }
+    const hitPath = paths.find(p => {
+      return p.points.some(pt => { const s=toScreen(pt.x,pt.y); return Math.hypot(s.x-mx,s.y-my)<18; });
+    });
+    if (hitPath && SESSION) {
+      if (SESSION.role==='admin' || hitPath.addedBy===SESSION.name) {
+        api('DELETE','/api/paths/'+hitPath.id).then(()=>{ paths=paths.filter(p=>p.id!==hitPath.id); renderPathList(); drawMap(); toast('Path removed'); });
+      } else { toast('You can only remove your own paths'); }
+    }
+  }
+}
+
+function onMapMove(e) {
+  const {x:mx,y:my} = getMousePos(e);
+  const {x,y} = toCanvas(mx,my);
+
+  if (isDragging && dragStart) {
+    mapOffX = dragStart.ox + (mx - dragStart.x);
+    mapOffY = dragStart.oy + (my - dragStart.y);
+    drawMap(); return;
+  }
+  if (isDrawing && currentTool==='path') {
+    draftPath.push({x,y}); drawMap(); return;
+  }
+
+  // Tooltip
+  const tt = document.getElementById('pin-tooltip');
+  const hit = pins.find(p => {
+    const s = toScreen(p.x,p.y);
+    return Math.hypot(s.x-mx,s.y-my)<16;
+  });
+  if (hit) {
+    document.getElementById('tt-type').textContent = PIN_LABELS[hit.type]||hit.type;
+    document.getElementById('tt-name').textContent = hit.name;
+    document.getElementById('tt-notes').textContent = hit.notes||'';
+    tt.style.display='block';
+    tt.style.left=(mx+14)+'px'; tt.style.top=(my-10)+'px';
+  } else {
+    tt.style.display='none';
+  }
+}
+
+function onMapUp(e) {
+  isDragging=false;
+  if (isDrawing && currentTool==='path' && draftPath.length>3) {
+    isDrawing=false;
+    // simplify path
+    draftPath = simplifyPath(draftPath, 4);
+    drawMap();
+    document.getElementById('path-hint').textContent='Path drawn! Give it a name and click Save Path.';
+  }
+  isDrawing=false;
+}
+
+function onMapWheel(e) {
+  e.preventDefault();
+  const {x:mx,y:my} = getMousePos(e);
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const newScale = Math.min(4, Math.max(0.4, mapScale*delta));
+  mapOffX = mx - (mx - mapOffX)*newScale/mapScale;
+  mapOffY = my - (my - mapOffY)*newScale/mapScale;
+  mapScale = newScale;
+  drawMap();
+}
+
+function getMousePos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x:e.clientX-r.left, y:e.clientY-r.top };
+}
+
+function simplifyPath(pts, tolerance) {
+  if (pts.length<=2) return pts;
+  const out=[pts[0]];
+  for (let i=1;i<pts.length-1;i++) {
+    const p=pts[i],last=out[out.length-1];
+    if (Math.hypot(p.x-last.x,p.y-last.y)>tolerance) out.push(p);
+  }
+  out.push(pts[pts.length-1]);
+  return out;
+}
+
+function drawMap() {
+  if (!canvas||!ctx) return;
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.save();
+  ctx.translate(mapOffX, mapOffY);
+  ctx.scale(mapScale, mapScale);
+
+  // ── Background parchment ──
+  ctx.fillStyle='#C8D8B0';
+  ctx.fillRect(-200,-200,MAP_W+400,MAP_H+400);
+
+  // ── Parchment texture ──
+  ctx.fillStyle='#D4C89A';
+  ctx.fillRect(0,0,MAP_W,MAP_H);
+  // vignette edges
+  const vg=ctx.createRadialGradient(MAP_W/2,MAP_H/2,MAP_H*0.3,MAP_W/2,MAP_H/2,MAP_H*0.8);
+  vg.addColorStop(0,'rgba(244,233,204,0)');
+  vg.addColorStop(1,'rgba(139,100,50,0.3)');
+  ctx.fillStyle=vg;
+  ctx.fillRect(0,0,MAP_W,MAP_H);
+
+  // ── Grid dots ──
+  ctx.fillStyle='rgba(100,80,40,0.15)';
+  for(let gx=80;gx<MAP_W;gx+=80) for(let gy=60;gy<MAP_H;gy+=60) {
+    ctx.beginPath(); ctx.arc(gx,gy,1.5,0,Math.PI*2); ctx.fill();
+  }
+
+  // ── Border ──
+  ctx.strokeStyle='rgba(100,70,30,0.5)'; ctx.lineWidth=4;
+  ctx.strokeRect(12,12,MAP_W-24,MAP_H-24);
+  ctx.strokeStyle='rgba(100,70,30,0.25)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(20,20,MAP_W-40,MAP_H-40);
+
+  // ── Title ──
+  ctx.font='bold 28px "Playfair Display", serif';
+  ctx.fillStyle='rgba(80,50,20,0.5)';
+  ctx.textAlign='center';
+  ctx.fillText('PRESINT 14',MAP_W/2,48);
+  ctx.font='12px "Special Elite", cursive';
+  ctx.fillText('PUTRAJAYA · MALAYSIA',MAP_W/2,66);
+
+  // ── Compass rose ──
+  drawCompass(ctx, MAP_W-90, 90, 44);
+
+  // ── Decorative terrain features ──
+  drawTerrain(ctx);
+
+  // ── Saved paths ──
+  paths.forEach(p => {
+    if (!p.points||p.points.length<2) return;
+    ctx.save();
+    ctx.strokeStyle=p.color||'#8B2215';
+    ctx.lineWidth=3;
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    ctx.setLineDash([8,4]);
+    ctx.beginPath();
+    ctx.moveTo(p.points[0].x,p.points[0].y);
+    p.points.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // label at midpoint
+    const mid=p.points[Math.floor(p.points.length/2)];
+    ctx.font='11px "Special Elite",cursive';
+    ctx.fillStyle=p.color||'#8B2215';
+    ctx.textAlign='center';
+    ctx.fillText(p.name||'',mid.x,mid.y-8);
+    ctx.restore();
+  });
+
+  // ── Draft path ──
+  if (draftPath.length>1) {
+    ctx.save();
+    const col=document.getElementById('path-color')?.value||'#8B2215';
+    ctx.strokeStyle=col;
+    ctx.lineWidth=2.5;
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    ctx.setLineDash([6,4]);
+    ctx.globalAlpha=0.7;
+    ctx.beginPath();
+    ctx.moveTo(draftPath[0].x,draftPath[0].y);
+    draftPath.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Pins ──
+  pins.forEach(p => drawPin(ctx,p.x,p.y,p.type,p.name,false));
+
+  // ── Pending pin ──
+  if (pendingPin) {
+    ctx.save();
+    ctx.strokeStyle='#C0A060'; ctx.lineWidth=2;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.arc(pendingPin.x,pendingPin.y,14,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // ── Home marker ──
+  drawHomePin(ctx, HOME.x, HOME.y);
+
+  ctx.restore();
+}
+
+function drawPin(ctx, x, y, type, name, hover) {
+  const color=PIN_COLORS[type]||'#8B2215';
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=4; ctx.shadowOffsetY=2;
+  // pin body
+  ctx.beginPath();
+  ctx.arc(x,y-14,9,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.fill();
+  ctx.strokeStyle='white'; ctx.lineWidth=1.5; ctx.stroke();
+  // pin stem
+  ctx.beginPath(); ctx.moveTo(x,y-5); ctx.lineTo(x,y+2);
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+  ctx.shadowBlur=0;
+  // label
+  ctx.font='bold 11px "Special Elite",cursive';
+  ctx.fillStyle=color; ctx.textAlign='center';
+  ctx.fillStyle='rgba(40,20,0,0.7)';
+  ctx.fillText(name,x,y+14);
+  ctx.restore();
+}
+
+function drawHomePin(ctx,x,y) {
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
+  ctx.beginPath(); ctx.arc(x,y-16,11,0,Math.PI*2);
+  ctx.fillStyle='#C0A060'; ctx.fill();
+  ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke();
+  ctx.font='bold 13px serif'; ctx.fillStyle='white'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('⌂',x,y-16);
+  ctx.shadowBlur=0;
+  ctx.font='bold 12px "Special Elite",cursive'; ctx.fillStyle='#8B6914'; ctx.textBaseline='alphabetic';
+  ctx.fillText('HOME BASE',x,y+6);
+  ctx.restore();
+}
+
+function drawCompass(ctx,cx,cy,r) {
+  ctx.save();
+  ctx.strokeStyle='rgba(80,50,20,0.6)'; ctx.fillStyle='rgba(80,50,20,0.6)';
+  // Circle
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.lineWidth=1.5; ctx.stroke();
+  // Cardinal lines
+  [0,Math.PI/2,Math.PI,Math.PI*1.5].forEach(a=>{
+    ctx.beginPath(); ctx.moveTo(cx+Math.sin(a)*(r-6),cy-Math.cos(a)*(r-6));
+    ctx.lineTo(cx+Math.sin(a)*r*0.5,cy-Math.cos(a)*r*0.5); ctx.lineWidth=1; ctx.stroke();
+  });
+  // N arrow
+  ctx.beginPath(); ctx.moveTo(cx,cy-r+4); ctx.lineTo(cx-5,cy); ctx.lineTo(cx+5,cy); ctx.closePath();
+  ctx.fillStyle='rgba(139,34,21,0.7)'; ctx.fill();
+  ctx.font='bold 13px "Special Elite",cursive'; ctx.fillStyle='rgba(80,50,20,0.8)'; ctx.textAlign='center';
+  ctx.fillText('N',cx,cy-r-4);
+  ctx.restore();
+}
+
+function drawTerrain(ctx) {
+  ctx.save(); ctx.globalAlpha=0.13;
+  // Scattered trees (circles)
+  const trees=[[120,200],[180,350],[90,500],[300,180],[750,200],[900,150],[1050,300],[150,720],[400,780],[850,700],[1050,650],[200,600],[500,120],[680,820]];
+  trees.forEach(([tx,ty])=>{
+    ctx.fillStyle='#3B5C2A';
+    ctx.beginPath(); ctx.arc(tx,ty,18,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(tx+10,ty-10,13,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(tx-8,ty+8,11,0,Math.PI*2); ctx.fill();
+  });
+  // Hills
+  ctx.fillStyle='#A0906A';
+  [[400,300,80,40],[700,600,100,50],[900,400,70,35]].forEach(([hx,hy,rw,rh])=>{
+    ctx.beginPath(); ctx.ellipse(hx,hy,rw,rh,0,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+
+  // Road-like lines (faint)
+  ctx.save(); ctx.strokeStyle='rgba(150,120,70,0.2)'; ctx.lineWidth=6; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(0,450); ctx.bezierCurveTo(300,430,400,470,700,450); ctx.bezierCurveTo(900,435,1100,460,MAP_W,445); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(600,0); ctx.bezierCurveTo(580,200,610,350,600,450); ctx.bezierCurveTo(590,560,615,700,605,MAP_H); ctx.stroke();
+  ctx.restore();
+}
+
+function setTool(t) {
+  currentTool=t;
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tool-'+t)?.classList.add('active');
+  canvas.style.cursor = t==='move'?'grab':t==='erase'?'crosshair':'crosshair';
+}
+
+function confirmPin() {
+  if (!pendingPin) { toast('Click the map first to choose a location'); return; }
+  const name=document.getElementById('pin-name').value.trim();
+  const type=document.getElementById('pin-type').value;
+  const notes=document.getElementById('pin-notes').value.trim();
+  if (!name) { toast('Give this spot a name!'); return; }
+
+  api('POST','/api/pins',{name,type,notes,x:pendingPin.x,y:pendingPin.y,addedBy:SESSION.name})
+    .then(pin => {
+      pins.push(pin); pendingPin=null;
+      document.getElementById('pin-name').value='';
+      document.getElementById('pin-notes').value='';
+      document.getElementById('map-hint').textContent='Select the pin tool then click on the map.';
+      renderPinList(); updateStats(); drawMap();
+      toast('📍 '+name+' marked!');
+    });
+}
+
+function savePath() {
+  if (draftPath.length<4) { toast('Draw a path on the map first'); return; }
+  const name=document.getElementById('path-name').value.trim()||'Unnamed Path';
+  const color=document.getElementById('path-color').value;
+
+  api('POST','/api/paths',{name,color,points:draftPath,addedBy:SESSION.name})
+    .then(path => {
+      paths.push(path); draftPath=[];
+      document.getElementById('path-name').value='';
+      document.getElementById('path-hint').textContent='Select the draw tool then click & drag on the map.';
+      renderPathList(); drawMap();
+      toast('Path "'+name+'" saved!');
+    });
+}
+
+function clearDraft() { draftPath=[]; drawMap(); }
+
+function renderPinList() {
+  const el=document.getElementById('pin-list');
+  document.getElementById('pin-count').textContent=pins.length;
+  if (!pins.length) { el.innerHTML='<p class="empty-state">No pins yet.</p>'; return; }
+  el.innerHTML=pins.map(p=>`
+    <div class="pin-list-item">
+      <div class="pd ${p.type}"></div>
+      <div style="flex:1">
+        <div class="pin-name">${p.name}</div>
+        <div class="pin-type">${PIN_LABELS[p.type]||p.type} · ${p.addedBy}</div>
+      </div>
+      ${(SESSION&&(SESSION.role==='admin'||p.addedBy===SESSION.name))?`<button class="btn-ghost" onclick="deletePin('${p.id}')">✕</button>`:''}
+    </div>`).join('');
+}
+
+function renderPathList() {
+  const el=document.getElementById('path-list');
+  document.getElementById('path-count').textContent=paths.length;
+  if (!paths.length) { el.innerHTML='<p class="empty-state">No paths yet.</p>'; return; }
+  el.innerHTML=paths.map(p=>`
+    <div class="path-list-item">
+      <div class="path-swatch" style="background:${p.color}"></div>
+      <div style="flex:1">
+        <div class="pin-name">${p.name}</div>
+        <div class="pin-type">${p.addedBy}</div>
+      </div>
+      ${(SESSION&&(SESSION.role==='admin'||p.addedBy===SESSION.name))?`<button class="btn-ghost" onclick="deletePath('${p.id}')">✕</button>`:''}
+    </div>`).join('');
+}
+
+function deletePin(id) {
+  api('DELETE','/api/pins/'+id).then(()=>{ pins=pins.filter(p=>p.id!==id); renderPinList(); updateStats(); drawMap(); toast('Pin removed'); });
+}
+function deletePath(id) {
+  api('DELETE','/api/paths/'+id).then(()=>{ paths=paths.filter(p=>p.id!==id); renderPathList(); drawMap(); toast('Path removed'); });
+}
+
+// ══════════════════════════════════════════
+// LOG
+// ══════════════════════════════════════════
+async function addLog() {
+  const title=document.getElementById('log-title').value.trim();
+  const date=document.getElementById('log-date').value;
+  const crew=document.getElementById('log-crew').value.trim();
+  const body=document.getElementById('log-body').value.trim();
+  const tagsRaw=document.getElementById('log-tags').value.trim();
+  if (!title||!body) { toast('Add a title and story!'); return; }
+  const tags=tagsRaw?tagsRaw.split(',').map(t=>t.trim()).filter(Boolean):[];
+
+  const log=await api('POST','/api/logs',{title,date,crew,body,tags});
+  logs.unshift(log);
+  document.getElementById('log-title').value='';
+  document.getElementById('log-crew').value='';
+  document.getElementById('log-body').value='';
+  document.getElementById('log-tags').value='';
+  renderLogs(); updateStats();
+  toast('Expedition recorded!');
+}
+
+function renderLogs() {
+  const el=document.getElementById('log-entries');
+  if (!logs.length) { el.innerHTML='<p class="empty-state">No entries yet. Record your first expedition!</p>'; return; }
+  el.innerHTML=logs.map(l=>{
+    const d=l.date?new Date(l.date).toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+    const tags=l.tags.map(t=>`<span class="etag">${t}</span>`).join('');
+    const canDel=SESSION&&(SESSION.role==='admin');
+    return `<div class="entry-card">
+      <div class="entry-date">${d}</div>
+      <div class="entry-title">${l.title}</div>
+      <div class="entry-body">${l.body}</div>
+      ${l.crew?`<div class="entry-crew">Crew: ${l.crew}</div>`:''}
+      ${tags?`<div class="entry-tags">${tags}</div>`:''}
+      ${canDel?`<div class="entry-actions"><button class="btn btn-outline" style="font-size:10px;padding:5px 12px;" onclick="deleteLog('${l.id}')">Delete</button></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function deleteLog(id) {
+  api('DELETE','/api/logs/'+id).then(()=>{ logs=logs.filter(l=>l.id!==id); renderLogs(); updateStats(); toast('Entry deleted'); });
+}
+
+// ══════════════════════════════════════════
+// MISSIONS
+// ══════════════════════════════════════════
+async function addMission() {
+  const title=document.getElementById('m-title').value.trim();
+  const date=document.getElementById('m-date').value;
+  const crew=document.getElementById('m-crew').value.trim();
+  const destination=document.getElementById('m-dest').value.trim();
+  const gear=[...document.querySelectorAll('.checklist-grid input:checked')].map(c=>c.value);
+  if (!title) { toast('Give the mission a name!'); return; }
+
+  const m=await api('POST','/api/missions',{title,date,crew,destination,gear});
+  missions.unshift(m);
+  document.getElementById('m-title').value='';
+  document.getElementById('m-crew').value='';
+  document.getElementById('m-dest').value='';
+  document.querySelectorAll('.checklist-grid input').forEach(c=>c.checked=false);
+  renderMissions();
+  toast('Mission planned!');
+}
+
+function renderMissions() {
+  const el=document.getElementById('mission-list');
+  if (!missions.length) { el.innerHTML='<p class="empty-state">No missions yet. Plan your first expedition!</p>'; return; }
+  el.innerHTML=missions.map(m=>{
+    const d=m.date?new Date(m.date).toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long'}):'TBD';
+    const gear=m.gear.map(g=>`<span class="gear-tag">${g}</span>`).join('');
+    return `<div class="mission-card">
+      <span class="m-status ${m.status}">${m.status}</span>
+      <div class="m-title">${m.title}</div>
+      <div class="m-meta">
+        <div class="m-meta-item">📅 <span>${d}</span></div>
+        ${m.crew?`<div class="m-meta-item">👥 <span>${m.crew}</span></div>`:''}
+        ${m.destination?`<div class="m-meta-item">📍 <span>${m.destination}</span></div>`:''}
+      </div>
+      ${gear?`<div class="m-gear">${gear}</div>`:''}
+      <div class="m-actions">
+        ${m.status==='planned'?`<button class="btn btn-green" style="font-size:10px;padding:5px 14px;" onclick="completeMission('${m.id}')">Mark Complete</button>`:''}
+        <button class="btn btn-outline" style="font-size:10px;padding:5px 12px;" onclick="deleteMission('${m.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function completeMission(id) {
+  api('PATCH','/api/missions/'+id,{status:'completed'}).then(updated=>{ const m=missions.find(x=>x.id===id); if(m)m.status='completed'; renderMissions(); toast('Mission complete! ⚑'); });
+}
+function deleteMission(id) {
+  api('DELETE','/api/missions/'+id).then(()=>{ missions=missions.filter(m=>m.id!==id); renderMissions(); toast('Mission deleted'); });
+}
+
+// ══════════════════════════════════════════
+// RANKS & LEADERBOARD
+// ══════════════════════════════════════════
+const RANKS=[
+  {id:'scout',label:'Scout',req:0},
+  {id:'tracker',label:'Tracker',req:5},
+  {id:'pathfinder',label:'Pathfinder',req:15},
+  {id:'ranger',label:'Ranger',req:30},
+  {id:'cartographer',label:'Cartographer',req:50}
+];
+
+function getRank(discoveries) {
+  let rank=RANKS[0];
+  for(const r of RANKS) if(discoveries>=r.req) rank=r; else break;
+  return rank;
+}
+
+function renderLeaderboard() {
+  const el=document.getElementById('leaderboard');
+  const sorted=[...members].sort((a,b)=>(b.discoveries||0)-(a.discoveries||0));
+  if (!sorted.length) { el.innerHTML='<p class="empty-state" style="padding:14px;">No crew yet.</p>'; return; }
+
+  const nums=['g','s','b'];
+  el.innerHTML=sorted.map((m,i)=>{
+    const rank=getRank(m.discoveries||0);
+    const isYou=SESSION&&m.name===SESSION.name;
+    return `<div class="lb-row ${isYou?'you':''}">
+      <div class="lb-num ${nums[i]||''}">${i+1}</div>
+      <div class="lb-av">${m.name.substring(0,2).toUpperCase()}</div>
+      <div class="lb-info">
+        <div class="lb-name">${m.name}${isYou?' (You)':''}</div>
+        <div class="lb-title">${rank.label}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="lb-score">${m.discoveries||0}</div>
+        <div class="lb-lbl">discoveries</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update rank cards
+  if (SESSION) {
+    const me=members.find(m=>m.name===SESSION.name);
+    const myDisc=me?me.discoveries||0:0;
+    document.querySelectorAll('.rank-card').forEach(c=>{ c.classList.remove('unlocked'); c.querySelector('.you-badge')?.remove(); });
+    RANKS.forEach(r=>{
+      const card=document.getElementById('rank-'+r.id);
+      if (!card) return;
+      if (myDisc>=r.req) {
+        card.classList.remove('rank-locked'); card.classList.add('unlocked');
+      } else {
+        card.classList.add('rank-locked'); card.classList.remove('unlocked');
+      }
+    });
+    const myRank=getRank(myDisc);
+    const myCard=document.getElementById('rank-'+myRank.id);
+    if (myCard) { const b=document.createElement('span'); b.className='you-badge'; b.textContent='You'; myCard.appendChild(b); }
+  }
+}
+
+// ══════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════
+function renderAdminMembers() {
+  const el=document.getElementById('members-list');
+  if (!members.length) { el.innerHTML='<p class="empty-state">No members yet.</p>'; return; }
+  el.innerHTML=members.map(m=>{
+    const joined=new Date(m.joinedAt).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="member-row">
+      <div class="member-av">${m.name.substring(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="member-name">${m.name}</div>
+        <div class="member-since">Joined ${joined}</div>
+      </div>
+      <div class="member-disc">${m.discoveries||0}</div>
+      <button class="btn-ghost" onclick="removeMember('${m.name}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-pins').textContent=pins.length;
+  document.getElementById('stat-logs').textContent=logs.length;
+  document.getElementById('stat-members').textContent=members.length;
+}
+
+async function removeMember(name) {
+  if (!confirm('Remove '+name+' from the crew?')) return;
+  await api('DELETE','/api/members/'+encodeURIComponent(name));
+  members=members.filter(m=>m.name!==name);
+  renderAdminMembers(); renderLeaderboard(); updateStats();
+  toast(name+' removed from crew');
+}
+
+async function clearAllData() {
+  if (!confirm('This will delete ALL pins, paths, logs, missions and members. Are you sure?')) return;
+  await Promise.all([
+    ...pins.map(p=>api('DELETE','/api/pins/'+p.id)),
+    ...paths.map(p=>api('DELETE','/api/paths/'+p.id)),
+    ...logs.map(l=>api('DELETE','/api/logs/'+l.id)),
+    ...missions.map(m=>api('DELETE','/api/missions/'+m.id)),
+    ...members.map(m=>api('DELETE','/api/members/'+encodeURIComponent(m.name)))
+  ]);
+  pins=[];paths=[];logs=[];missions=[];members=[];
+  renderPinList(); renderPathList(); renderLogs(); renderMissions();
+  renderLeaderboard(); renderAdminMembers(); updateStats(); drawMap();
+  toast('All data cleared');
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── Defaults ──
+document.getElementById('log-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
