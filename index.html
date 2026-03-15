@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Explorers Handbook</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Special+Elite&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --paper: #F5EDDA;
+  --paper2: #EDE1C2;
+  --paper3: #E2D4AC;
+  --ink: #2A1F0E;
+  --ink2: #5C4A2A;
+  --ink3: #8A7150;
+  --red: #8B2215;
+  --red2: #C0392B;
+  --green: #2D5016;
+  --green2: #4A7C2A;
+  --border: rgba(42,31,14,0.2);
+  --border2: rgba(42,31,14,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lora', serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ink);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+}
+
+.header-inner {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.header-brand {
+  padding: 14px 28px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header-brand h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--paper);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.header-brand .tagline {
+  font-family: 'Special Elite', cursive;
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.header-brand .tagline span {
+  color: #C0A060;
+}
+
+nav {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 20px;
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-decoration: none;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+nav a:hover { color: var(--paper); background: rgba(255,255,255,0.05); }
+nav a.active { color: #C0A060; border-bottom: 2px solid #C0A060; }
+
+nav a .nav-icon { font-size: 14px; }
+
+.weather-pill {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.weather-pill .temp {
+  font-size: 16px;
+  color: #C0A060;
+  font-family: 'Playfair Display', serif;
+}
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── PAGE HERO ── */
+.page-hero {
+  background: var(--ink);
+  padding: 28px 40px;
+  border-bottom: 3px solid #C0A060;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-hero::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 200px;
+  height: 200px;
+  border: 40px solid rgba(192,160,96,0.06);
+  border-radius: 50%;
+}
+
+.page-hero h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  color: var(--paper);
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.page-hero p {
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  color: var(--ink3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* ── MAP PAGE ── */
+#map-page .content { padding: 0; }
+
+#map { height: 480px; width: 100%; }
+
+.map-sidebar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 2px solid var(--border);
+}
+
+.map-panel {
+  padding: 20px 24px;
+  border-right: 1px solid var(--border);
+}
+
+.map-panel:last-child { border-right: none; }
+
+.panel-title {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.form-group { margin-bottom: 10px; }
+
+.form-group label {
+  display: block;
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  font-family: 'Lora', serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--ink2);
+}
+
+.form-group textarea { min-height: 70px; resize: vertical; }
+
+.btn {
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: var(--ink2); }
+.btn-danger { background: var(--red); color: white; }
+.btn-danger:hover { background: var(--red2); }
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: var(--green2); }
+.btn-outline {
+  background: transparent;
+  color: var(--ink2);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--paper2); }
+
+.hint {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  font-style: italic;
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+}
+
+/* Pin list */
+.pin-list { max-height: 220px; overflow-y: auto; }
+
+.pin-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border2);
+  animation: fadeIn 0.3s ease;
+}
+
+.pin-item:last-child { border-bottom: none; }
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0,0,0,0.2);
+}
+
+.pin-dot.secret { background: var(--red); }
+.pin-dot.viewpoint { background: #1A6B8A; }
+.pin-dot.camp { background: var(--green); }
+.pin-dot.landmark { background: #8B6914; }
+.pin-dot.danger { background: #8B2215; }
+
+.pin-item-name {
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+  font-weight: bold;
+}
+
+.pin-item-type {
+  font-family: 'Special Elite', cursive;
+  font-size: 10px;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pin-item-del {
+  background: none;
+  border: none;
+  color: var(--ink3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.pin-item-del:hover { color: var(--red); }
+
+/* ── LOG PAGE ── */
+#log-page .content { padding: 28px 40px; }
+
+.log-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.log-form-box {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  padding: 20px;
+  position: sticky;
+  top: 65px;
+}
+
+.log-form-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.entries-list { display: flex; flex-direction: column; gap: 16px; }
+
+.entry-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--red);
+  padding: 18px 20px;
+  position: relative;
+  animation: fadeIn 0.4s ease;
+}
+
+.entry-card .entry-date {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.entry-card .entry-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.entry-card .entry-body {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.75;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.entry-card .entry-crew {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+}
+
+.entry-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+.etag {
+  font-family: 'Special Elite', cursive;
+  font-size: 10px;
+  padding: 2px 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: var(--paper2);
+  color: var(--ink2);
+}
+
+/* ── RANKS PAGE ── */
+#ranks-page .content { padding: 28px 40px; }
+
+.ranks-intro {
+  font-size: 14px;
+  color: var(--ink2);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+.ranks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.rank-card {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+  transition: transform 0.15s;
+}
+
+.rank-card:hover { transform: translateY(-2px); }
+
+.rank-card.current-rank {
+  border: 2px solid #C0A060;
+  background: var(--paper);
+}
+
+.rank-card .you-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: #C0A060;
+  color: var(--ink);
+  font-family: 'Special Elite', cursive;
+  font-size: 9px;
+  padding: 3px 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rank-emblem {
+  font-size: 36px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.rank-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.rank-req {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+}
+
+.rank-locked { opacity: 0.45; }
+
+.leaderboard-section h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.leaderboard {
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--paper);
+  transition: background 0.15s;
+}
+
+.lb-row:last-child { border-bottom: none; }
+.lb-row:nth-child(even) { background: var(--paper2); }
+.lb-row:hover { background: var(--paper3); }
+.lb-row.you-row { background: rgba(192,160,96,0.1); border-left: 3px solid #C0A060; }
+
+.lb-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--red);
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.lb-num.gold { color: #C0A060; }
+.lb-num.silver { color: #8A8A8A; }
+.lb-num.bronze { color: #8B5A1A; }
+
+.lb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.lb-info { flex: 1; }
+.lb-name { font-size: 14px; font-weight: bold; color: var(--ink); }
+.lb-title { font-family: 'Special Elite', cursive; font-size: 11px; color: var(--ink3); letter-spacing: 0.08em; }
+.lb-score { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--red); font-weight: 700; }
+.lb-label { font-family: 'Special Elite', cursive; font-size: 10px; color: var(--ink3); }
+
+/* ── MISSION PAGE ── */
+#mission-page .content { padding: 28px 40px; }
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.mission-form-box {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--green);
+  padding: 20px;
+  position: sticky;
+  top: 65px;
+}
+
+.mission-form-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.checklist-section { margin-top: 12px; }
+
+.checklist-section label {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  color: var(--ink2);
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.check-item input[type="checkbox"] { accent-color: var(--green); width: 14px; height: 14px; }
+
+.missions-list { display: flex; flex-direction: column; gap: 14px; }
+
+.mission-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--green);
+  padding: 18px 20px;
+  animation: fadeIn 0.4s ease;
+}
+
+.mission-card .m-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.mission-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.m-meta-item {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+}
+
+.m-meta-item span { color: var(--ink); font-weight: bold; }
+
+.m-gear {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.gear-tag {
+  background: var(--green);
+  color: white;
+  font-family: 'Special Elite', cursive;
+  font-size: 10px;
+  padding: 2px 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.m-status {
+  display: inline-block;
+  font-family: 'Special Elite', cursive;
+  font-size: 10px;
+  padding: 3px 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.m-status.planned { background: rgba(192,160,96,0.2); color: #8B6914; border: 1px solid #C0A060; }
+.m-status.completed { background: rgba(45,80,22,0.15); color: var(--green); border: 1px solid var(--green); }
+
+/* ── WEATHER PAGE ── */
+#weather-page .content { padding: 28px 40px; }
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.weather-day {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.weather-day.today { border: 2px solid #C0A060; background: var(--paper); }
+
+.wd-day {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+
+.wd-icon { font-size: 32px; margin-bottom: 8px; line-height: 1; }
+
+.wd-temp {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.wd-rain {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: #1A6B8A;
+}
+
+.wd-rain.high { color: var(--red); }
+
+.explorer-advice {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 20px 24px;
+  border-left: 4px solid #C0A060;
+  margin-top: 8px;
+}
+
+.explorer-advice h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #C0A060;
+}
+
+.explorer-advice p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--paper2);
+}
+
+.advice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.advice-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 14px;
+}
+
+.advice-card h4 {
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #C0A060;
+  margin-bottom: 6px;
+}
+
+.advice-card p {
+  font-size: 13px;
+  color: rgba(245,237,218,0.7);
+  line-height: 1.6;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* DECORATIVE */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border2);
+  margin: 24px 0;
+  position: relative;
+}
+
+.divider::after {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  transform: translateX(-50%);
+  background: var(--paper);
+  padding: 0 8px;
+  color: var(--ink3);
+  font-size: 10px;
+}
+
+/* LEAFLET CUSTOM */
+.leaflet-popup-content-wrapper {
+  background: var(--paper) !important;
+  border: 2px solid var(--ink) !important;
+  border-radius: 0 !important;
+  font-family: 'Lora', serif !important;
+  box-shadow: 3px 3px 0 var(--ink2) !important;
+}
+
+.leaflet-popup-tip { background: var(--paper) !important; }
+
+.custom-popup-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.custom-popup-type {
+  font-family: 'Special Elite', cursive;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.custom-popup-desc {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.6;
+}
+
+.custom-pin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .log-grid, .mission-grid { grid-template-columns: 1fr; }
+  .advice-grid { grid-template-columns: 1fr; }
+  .map-sidebar { grid-template-columns: 1fr; }
+  .page-hero { padding: 20px; }
+  .page-hero h2 { font-size: 24px; }
+  #log-page .content, #ranks-page .content, #mission-page .content, #weather-page .content { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <h1>⚑ The Explorers Handbook</h1>
+      <div class="tagline">Presint 14, Putrajaya · <span>Est. 2025</span></div>
+    </div>
+    <nav>
+      <a href="#" class="active" data-page="map-page" onclick="showPage('map-page',this)">
+        <span class="nav-icon">🗺</span> Map
+      </a>
+      <a href="#" data-page="log-page" onclick="showPage('log-page',this)">
+        <span class="nav-icon">📖</span> Expedition Log
+      </a>
+      <a href="#" data-page="ranks-page" onclick="showPage('ranks-page',this)">
+        <span class="nav-icon">🏅</span> Ranks
+      </a>
+      <a href="#" data-page="mission-page" onclick="showPage('mission-page',this)">
+        <span class="nav-icon">🧭</span> Missions
+      </a>
+      <a href="#" data-page="weather-page" onclick="showPage('weather-page',this)">
+        <span class="nav-icon">🌦</span> Weather
+      </a>
+    </nav>
+    <div class="weather-pill">
+      <span>Putrajaya</span>
+      <span class="temp">26°C ☁</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════ MAP PAGE ══════════════════════════════ -->
+<div id="map-page" class="page active">
+  <div class="page-hero">
+    <h2>The Territory</h2>
+    <p>Click the map to drop a pin · <span id="pin-count">0</span> discoveries marked</p>
+  </div>
+  <div class="content">
+    <div id="map"></div>
+    <div class="map-sidebar">
+      <div class="map-panel">
+        <div class="panel-title">📍 Drop a Pin</div>
+        <div class="form-group">
+          <label>Spot Name</label>
+          <input type="text" id="pin-name" placeholder="e.g. The Hollow Tree"/>
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="pin-type">
+            <option value="secret">🔴 Secret Spot</option>
+            <option value="viewpoint">🔵 Viewpoint</option>
+            <option value="camp">🟢 Camp / Rest</option>
+            <option value="landmark">🟡 Landmark</option>
+            <option value="danger">⚫ Danger Zone</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="pin-notes" placeholder="What makes this place special?"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="confirmPin()">Mark This Spot</button>
+        <p class="hint" id="map-hint">Click anywhere on the map first to choose a location.</p>
+      </div>
+      <div class="map-panel">
+        <div class="panel-title">📋 Discovered Spots (<span id="pin-count2">0</span>)</div>
+        <div class="pin-list" id="pin-list">
+          <p style="font-family:'Special Elite',cursive;font-size:12px;color:var(--ink3);font-style:italic;">No discoveries yet — venture out and mark your first spot!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ LOG PAGE ══════════════════════════════ -->
+<div id="log-page" class="page">
+  <div class="page-hero">
+    <h2>Expedition Log</h2>
+    <p>Chronicles of The Explorers · Every adventure recorded</p>
+  </div>
+  <div class="content">
+    <div class="log-grid">
+      <div class="log-form-box">
+        <h3>📝 New Entry</h3>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="log-title" placeholder="e.g. The Great Swamp Crossing"/>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="log-date"/>
+        </div>
+        <div class="form-group">
+          <label>Crew Members</label>
+          <input type="text" id="log-crew" placeholder="e.g. Haziq, Amir, Sara"/>
+        </div>
+        <div class="form-group">
+          <label>What Happened</label>
+          <textarea id="log-body" placeholder="Write your expedition story here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="log-tags" placeholder="e.g. rain, long route, discovery"/>
+        </div>
+        <button class="btn btn-primary" onclick="addLogEntry()" style="width:100%;margin-top:4px;">Record This Expedition</button>
+      </div>
+      <div>
+        <div class="entries-list" id="entries-list">
+          <!-- sample entry -->
+          <div class="entry-card">
+            <div class="entry-date">Sunday, 15 March 2026</div>
+            <div class="entry-title">First Entry — The Handbook Begins</div>
+            <div class="entry-body">The Explorers of Presint 14 have established this handbook as the official record of all expeditions, discoveries, and adventures. Let every page be filled with stories worth telling.</div>
+            <div class="entry-crew">Crew: All of us</div>
+            <div class="entry-tags">
+              <span class="etag">founding</span>
+              <span class="etag">presint 14</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ RANKS PAGE ══════════════════════════════ -->
+<div id="ranks-page" class="page">
+  <div class="page-hero">
+    <h2>Explorer Ranks</h2>
+    <p>Earn your title through discovery · Rise through the ranks</p>
+  </div>
+  <div class="content">
+    <p class="ranks-intro">Every Explorer starts as a Scout. Mark spots, log expeditions, and complete missions to rise through the ranks. The Cartographer is the highest honour — awarded only to those who have charted the most of Putrajaya's hidden world.</p>
+
+    <div class="ranks-grid">
+      <div class="rank-card current-rank">
+        <span class="you-badge">Your Rank</span>
+        <div class="rank-emblem">🥾</div>
+        <div class="rank-name">Scout</div>
+        <div class="rank-req">Starting rank · 0 discoveries</div>
+      </div>
+      <div class="rank-card">
+        <div class="rank-emblem">🌿</div>
+        <div class="rank-name">Tracker</div>
+        <div class="rank-req">5 discoveries marked</div>
+      </div>
+      <div class="rank-card rank-locked">
+        <div class="rank-emblem">🧭</div>
+        <div class="rank-name">Pathfinder</div>
+        <div class="rank-req">15 discoveries + 5 log entries</div>
+      </div>
+      <div class="rank-card rank-locked">
+        <div class="rank-emblem">🗺</div>
+        <div class="rank-name">Ranger</div>
+        <div class="rank-req">30 discoveries + 10 missions</div>
+      </div>
+      <div class="rank-card rank-locked">
+        <div class="rank-emblem">⚑</div>
+        <div class="rank-name">Cartographer</div>
+        <div class="rank-req">50 discoveries · Supreme rank</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="leaderboard-section">
+      <h3>Leaderboard</h3>
+      <div class="form-group" style="max-width:320px;margin-bottom:14px;">
+        <label>Add a Crew Member</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="lb-name" placeholder="Name"/>
+          <input type="number" id="lb-score" placeholder="Pts" style="width:80px;"/>
+          <button class="btn btn-primary" onclick="addLeader()">Add</button>
+        </div>
+      </div>
+      <div class="leaderboard" id="leaderboard">
+        <div class="lb-row you-row">
+          <div class="lb-num gold">1</div>
+          <div class="lb-avatar">ME</div>
+          <div class="lb-info">
+            <div class="lb-name">You</div>
+            <div class="lb-title">Scout · Presint 14</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="lb-score">0</div>
+            <div class="lb-label">discoveries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ MISSION PAGE ══════════════════════════════ -->
+<div id="mission-page" class="page">
+  <div class="page-hero">
+    <h2>Mission Planner</h2>
+    <p>Plan your next expedition · Gear up and head out</p>
+  </div>
+  <div class="content">
+    <div class="mission-grid">
+      <div class="mission-form-box">
+        <h3>🧭 Plan a Mission</h3>
+        <div class="form-group">
+          <label>Mission Name</label>
+          <input type="text" id="m-title" placeholder="e.g. Swamp Route Recon"/>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="m-date"/>
+        </div>
+        <div class="form-group">
+          <label>Crew Going</label>
+          <input type="text" id="m-crew" placeholder="e.g. Haziq, Amir"/>
+        </div>
+        <div class="form-group">
+          <label>Destination / Route</label>
+          <input type="text" id="m-dest" placeholder="e.g. Behind Presint 11 park"/>
+        </div>
+        <div class="checklist-section">
+          <label>Gear Checklist</label>
+          <div class="checklist-grid" id="gear-checks">
+            <label class="check-item"><input type="checkbox" value="Water"/> Water</label>
+            <label class="check-item"><input type="checkbox" value="Snacks"/> Snacks</label>
+            <label class="check-item"><input type="checkbox" value="Flashlight"/> Flashlight</label>
+            <label class="check-item"><input type="checkbox" value="Phone"/> Phone</label>
+            <label class="check-item"><input type="checkbox" value="First Aid"/> First Aid</label>
+            <label class="check-item"><input type="checkbox" value="Rope"/> Rope</label>
+            <label class="check-item"><input type="checkbox" value="Notebook"/> Notebook</label>
+            <label class="check-item"><input type="checkbox" value="Umbrella"/> Umbrella</label>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="addMission()" style="width:100%;margin-top:16px;">Create Mission</button>
+      </div>
+      <div class="missions-list" id="missions-list">
+        <p style="font-family:'Special Elite',cursive;font-size:13px;color:var(--ink3);font-style:italic;">No missions yet. Plan your first expedition!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ WEATHER PAGE ══════════════════════════════ -->
+<div id="weather-page" class="page">
+  <div class="page-hero">
+    <h2>Weather Conditions</h2>
+    <p>Putrajaya, Presint 14 · Field intelligence before you venture out</p>
+  </div>
+  <div class="content">
+    <div class="weather-grid">
+      <div class="weather-day today">
+        <div class="wd-day">Today · Sun</div>
+        <div class="wd-icon">☁️</div>
+        <div class="wd-temp">31°C</div>
+        <div class="wd-rain high">☔ 60% rain</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-day">Monday</div>
+        <div class="wd-icon">🌦️</div>
+        <div class="wd-temp">32°C</div>
+        <div class="wd-rain">☔ 45% rain</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-day">Tuesday</div>
+        <div class="wd-icon">🌧️</div>
+        <div class="wd-temp">32°C</div>
+        <div class="wd-rain high">☔ 85% rain · Avoid</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-day">Wednesday</div>
+        <div class="wd-icon">🌦️</div>
+        <div class="wd-temp">32°C</div>
+        <div class="wd-rain">☔ 45% rain</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-day">Thursday</div>
+        <div class="wd-icon">⛅</div>
+        <div class="wd-temp">31°C</div>
+        <div class="wd-rain high">☔ 60% rain</div>
+      </div>
+    </div>
+
+    <div class="explorer-advice">
+      <h3>⚑ Field Intelligence</h3>
+      <p>This week is typical Putrajaya weather — hot and humid with afternoon showers likely most days. Tuesday is the worst day at 85% rain chance, so avoid long expeditions then. Best windows are <strong style="color:#C0A060">early mornings before 11am</strong> when it's cooler and rain hasn't built up yet.</p>
+
+      <div class="advice-grid">
+        <div class="advice-card">
+          <h4>🌡 Heat Advisory</h4>
+          <p>Highs of 31–32°C all week. Always bring enough water — at least 1.5L per explorer. Take shade breaks.</p>
+        </div>
+        <div class="advice-card">
+          <h4>☔ Rain Readiness</h4>
+          <p>Pack an umbrella or poncho every time. Malaysian rain can come fast — paths get muddy and slippery quickly.</p>
+        </div>
+        <div class="advice-card">
+          <h4>⏰ Best Time to Go</h4>
+          <p>7am–10am is the golden window. Cool enough to move, dry enough to explore. Avoid 2pm–5pm — peak storm time.</p>
+        </div>
+        <div class="advice-card">
+          <h4>👟 Terrain Tip</h4>
+          <p>After rain, grass and soil around Putrajaya wetlands gets very slick. Wear shoes with grip, not sandals.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// ── NAV ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'map-page') setTimeout(() => map.invalidateSize(), 100);
+}
+
+// ── MAP ──
+const map = L.map('map', {
+  center: [2.9180, 101.7000],
+  zoom: 15,
+  zoomControl: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 19
+}).addTo(map);
+
+// Sepia-ish filter via CSS on the tile layer
+const mapEl = document.getElementById('map');
+mapEl.style.filter = 'sepia(30%) saturate(80%) brightness(0.95)';
+
+let pendingLatLng = null;
+let tempMarker = null;
+let pins = [];
+
+const typeColors = {
+  secret: '#8B2215',
+  viewpoint: '#1A6B8A',
+  camp: '#2D5016',
+  landmark: '#8B6914',
+  danger: '#2A1F0E'
+};
+
+const typeLabels = {
+  secret: 'Secret Spot',
+  viewpoint: 'Viewpoint',
+  camp: 'Camp / Rest',
+  landmark: 'Landmark',
+  danger: 'Danger Zone'
+};
+
+function makeIcon(type) {
+  const color = typeColors[type] || '#2A1F0E';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.3 21.7 0 14 0z" fill="${color}" stroke="white" stroke-width="2"/>
+    <circle cx="14" cy="14" r="5" fill="white" opacity="0.85"/>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -36],
+    className: ''
+  });
+}
+
+map.on('click', function(e) {
+  pendingLatLng = e.latlng;
+  if (tempMarker) map.removeLayer(tempMarker);
+  tempMarker = L.circleMarker(e.latlng, {
+    radius: 8, color: '#C0A060', fillColor: '#C0A060', fillOpacity: 0.7, weight: 2
+  }).addTo(map);
+  document.getElementById('map-hint').textContent = 'Location selected! Fill in the form and click Mark This Spot.';
+});
+
+function confirmPin() {
+  const name = document.getElementById('pin-name').value.trim();
+  const type = document.getElementById('pin-type').value;
+  const notes = document.getElementById('pin-notes').value.trim();
+  if (!name) { alert('Give this spot a name!'); return; }
+  if (!pendingLatLng) { alert('Click on the map first to choose a location!'); return; }
+
+  const marker = L.marker(pendingLatLng, { icon: makeIcon(type) }).addTo(map);
+  marker.bindPopup(`
+    <div class="custom-popup-title">${name}</div>
+    <div class="custom-popup-type">${typeLabels[type]}</div>
+    ${notes ? `<div class="custom-popup-desc">${notes}</div>` : ''}
+  `);
+
+  pins.push({ name, type, notes, latlng: pendingLatLng, marker });
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+  pendingLatLng = null;
+
+  document.getElementById('pin-name').value = '';
+  document.getElementById('pin-notes').value = '';
+  document.getElementById('map-hint').textContent = 'Click anywhere on the map first to choose a location.';
+
+  updatePinList();
+}
+
+function updatePinList() {
+  const count = pins.length;
+  document.getElementById('pin-count').textContent = count;
+  document.getElementById('pin-count2').textContent = count;
+
+  const list = document.getElementById('pin-list');
+  if (count === 0) {
+    list.innerHTML = '<p style="font-family:\'Special Elite\',cursive;font-size:12px;color:var(--ink3);font-style:italic;">No discoveries yet!</p>';
+    return;
+  }
+
+  list.innerHTML = pins.map((p, i) => `
+    <div class="pin-item">
+      <div class="pin-dot ${p.type}"></div>
+      <div>
+        <div class="pin-item-name">${p.name}</div>
+        <div class="pin-item-type">${typeLabels[p.type]}</div>
+      </div>
+      <button class="pin-item-del" onclick="removePin(${i})" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+function removePin(i) {
+  map.removeLayer(pins[i].marker);
+  pins.splice(i, 1);
+  updatePinList();
+}
+
+// ── LOG ──
+function addLogEntry() {
+  const title = document.getElementById('log-title').value.trim();
+  const date = document.getElementById('log-date').value;
+  const crew = document.getElementById('log-crew').value.trim();
+  const body = document.getElementById('log-body').value.trim();
+  const tagsRaw = document.getElementById('log-tags').value.trim();
+  if (!title || !body) { alert('Add a title and expedition story!'); return; }
+
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => `<span class="etag">${t.trim()}</span>`).join('') : '';
+  const dateStr = date ? new Date(date).toLocaleDateString('en-MY', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'Today';
+
+  const card = document.createElement('div');
+  card.className = 'entry-card';
+  card.innerHTML = `
+    <div class="entry-date">${dateStr}</div>
+    <div class="entry-title">${title}</div>
+    <div class="entry-body">${body}</div>
+    ${crew ? `<div class="entry-crew">Crew: ${crew}</div>` : ''}
+    ${tags ? `<div class="entry-tags">${tags}</div>` : ''}
+  `;
+
+  const list = document.getElementById('entries-list');
+  list.insertBefore(card, list.firstChild);
+
+  document.getElementById('log-title').value = '';
+  document.getElementById('log-date').value = '';
+  document.getElementById('log-crew').value = '';
+  document.getElementById('log-body').value = '';
+  document.getElementById('log-tags').value = '';
+}
+
+// ── LEADERBOARD ──
+let leaders = [{ name: 'You', score: 0, title: 'Scout · Presint 14', isYou: true }];
+
+function addLeader() {
+  const name = document.getElementById('lb-name').value.trim();
+  const score = parseInt(document.getElementById('lb-score').value) || 0;
+  if (!name) return;
+  leaders.push({ name, score, title: score < 5 ? 'Scout' : score < 15 ? 'Tracker' : 'Pathfinder', isYou: false });
+  leaders.sort((a, b) => b.score - a.score);
+  renderLeaderboard();
+  document.getElementById('lb-name').value = '';
+  document.getElementById('lb-score').value = '';
+}
+
+function renderLeaderboard() {
+  const numColors = ['gold', 'silver', 'bronze'];
+  document.getElementById('leaderboard').innerHTML = leaders.map((l, i) => `
+    <div class="lb-row ${l.isYou ? 'you-row' : ''}">
+      <div class="lb-num ${numColors[i] || ''}">${i + 1}</div>
+      <div class="lb-avatar">${l.name.substring(0,2).toUpperCase()}</div>
+      <div class="lb-info">
+        <div class="lb-name">${l.name}${l.isYou ? ' (You)' : ''}</div>
+        <div class="lb-title">${l.title}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="lb-score">${l.score}</div>
+        <div class="lb-label">discoveries</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── MISSIONS ──
+function addMission() {
+  const title = document.getElementById('m-title').value.trim();
+  const date = document.getElementById('m-date').value;
+  const crew = document.getElementById('m-crew').value.trim();
+  const dest = document.getElementById('m-dest').value.trim();
+  if (!title) { alert('Give the mission a name!'); return; }
+
+  const gear = [...document.querySelectorAll('#gear-checks input:checked')].map(c => c.value);
+  const dateStr = date ? new Date(date).toLocaleDateString('en-MY', {weekday:'long',day:'numeric',month:'long'}) : 'TBD';
+
+  const card = document.createElement('div');
+  card.className = 'mission-card';
+  card.innerHTML = `
+    <span class="m-status planned">Planned</span>
+    <div class="m-title">${title}</div>
+    <div class="mission-meta">
+      <div class="m-meta-item">📅 <span>${dateStr}</span></div>
+      ${crew ? `<div class="m-meta-item">👥 <span>${crew}</span></div>` : ''}
+      ${dest ? `<div class="m-meta-item">📍 <span>${dest}</span></div>` : ''}
+    </div>
+    ${gear.length > 0 ? `<div class="m-gear">${gear.map(g => `<span class="gear-tag">${g}</span>`).join('')}</div>` : ''}
+    <div style="margin-top:12px;">
+      <button class="btn btn-green" onclick="completeMission(this)" style="margin-right:6px;font-size:11px;padding:6px 14px;">Mark Complete</button>
+      <button class="btn btn-outline" onclick="this.closest('.mission-card').remove()" style="font-size:11px;padding:6px 14px;">Delete</button>
+    </div>
+  `;
+
+  const list = document.getElementById('missions-list');
+  if (list.querySelector('p')) list.innerHTML = '';
+  list.insertBefore(card, list.firstChild);
+
+  document.getElementById('m-title').value = '';
+  document.getElementById('m-date').value = '';
+  document.getElementById('m-crew').value = '';
+  document.getElementById('m-dest').value = '';
+  document.querySelectorAll('#gear-checks input').forEach(c => c.checked = false);
+}
+
+function completeMission(btn) {
+  const card = btn.closest('.mission-card');
+  card.querySelector('.m-status').className = 'm-status completed';
+  card.querySelector('.m-status').textContent = 'Completed';
+  card.style.borderTopColor = 'var(--red)';
+  btn.remove();
+}
+
+// set default date inputs to today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('log-date').value = today;
+document.getElementById('m-date').value = today;
+
+// Expose functions used in inline onclick handlers
+window.showPage = showPage;
+window.confirmPin = confirmPin;
+window.removePin = removePin;
+window.addLogEntry = addLogEntry;
+window.addLeader = addLeader;
+window.addMission = addMission;
+window.completeMission = completeMission;
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>

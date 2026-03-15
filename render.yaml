@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: explorers-handbook
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: CREW_PASSPHRASE
+        value: explorers14
+      - key: ADMIN_PASSWORD
+        value: abhinav123
+      - key: NODE_ENV
+        value: production
